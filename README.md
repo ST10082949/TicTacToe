@@ -19,8 +19,8 @@ An advanced Android Tic Tac Toe game built with Kotlin featuring **offline solo 
 - **Modern Material Design UI**
 - **Real-time game status updates**
 - **Firebase-powered online matchmaking**
-- **Simple and clean UI using GridLayout
-- **Toasts for player turns and results
+- **Simple and clean UI using GridLayout**
+- **Toasts for player turns and results**
 
 
 ---
@@ -48,9 +48,9 @@ An advanced Android Tic Tac Toe game built with Kotlin featuring **offline solo 
 ---
 
 ## 🙏 Acknowledgments
-- **Original game logic inspired by classic Tic Tac Toe implementations
-- **Firebase for real-time database services
-- **Android Material Design components
+- **Original game logic inspired by classic Tic Tac Toe implementations**
+- **Firebase for real-time database services**
+- **Android Material Design components**
 
 ---
 

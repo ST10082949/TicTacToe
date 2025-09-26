@@ -1,16 +1,56 @@
-# ❌⭕ X and O - Android Tic Tac Toe Game
+# ❌⭕ X and O - Enhanced Tic Tac Toe Game
 
-An Android implementation of the classic Tic Tac Toe (X and O) game using Kotlin and XML layouts. The current version supports local multiplayer (two players on the same device). This app serves as a foundation to extend into **solo with AI** and **online multiplayer**.
+An advanced Android Tic Tac Toe game built with Kotlin featuring **offline solo mode with AI**, **online multiplayer**, and **local multiplayer**. The app now includes intelligent AI opponents with multiple difficulty levels and real-time online gameplay using Firebase.
 
 ---
 
 ## 🎮 Features
 
-* Classic 3x3 grid game
-* Local 2-player mode
-* Reset functionality
-* Simple and clean UI using GridLayout
-* Toasts for player turns and results
+### ✅ Currently Implemented
+- **Classic 3x3 grid gameplay**
+- **Three Game Modes:**
+  - 🧠 **Solo Mode** - Play against AI with three difficulty levels
+  - 👥 **Offline Multiplayer** - Two players on the same device  
+  - 🌐 **Online Multiplayer** - Real-time gameplay with friends
+- **AI Difficulty Levels:**
+  - 🟢 **Easy** - Random moves
+  - 🟡 **Medium** - Strategic blocking and winning moves
+  - 🔴 **Hard** - Unbeatable MiniMax algorithm
+- **Modern Material Design UI**
+- **Real-time game status updates**
+- **Firebase-powered online matchmaking**
+- ** Simple and clean UI using GridLayout
+- ** Toasts for player turns and results
+
+
+---
+
+
+## 🎯 Game Modes
+
+### 🧠 Solo Mode with AI
+- **Easy Difficulty**: AI makes random valid moves
+- **Medium Difficulty**: AI can block wins and take winning moves
+- **Hard Difficulty**: Uses MiniMax algorithm for optimal play
+- Player always plays as **X**, AI plays as **O**
+
+### 👥 Offline Multiplayer
+- Traditional two-player gameplay
+- Alternate turns between Player X and Player O
+- Simple and intuitive interface
+
+### 🌐 Online Multiplayer
+- **Real-time synchronization** using Firebase Realtime Database
+- **Automatic matchmaking** system
+- **Game room management** with unique session IDs
+- **Live opponent tracking** and turn-based gameplay
+
+---
+
+## 🙏 Acknowledgments
+- **Original game logic inspired by classic Tic Tac Toe implementations
+- **Firebase for real-time database services
+- **Android Material Design components
 
 ---
 

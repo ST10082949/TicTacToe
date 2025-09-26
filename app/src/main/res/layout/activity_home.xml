@@ -1,30 +1,198 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical"
+    android:fillViewport="true"
+    android:background="@drawable/gradient_background"
     tools:context=".HomeActivity">
 
-
-    <Button
-        android:id="@+id/OfflineButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Offline Multiplayer" />
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:gravity="center_horizontal">
 
-    <Button
-        android:id="@+id/OnlineButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Online Multiplayer" />
+        <!-- App Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tic Tac Toe"
+            android:textColor="@android:color/white"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="60dp" />
 
-    <Button
-        android:id="@+id/SoloButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Solo" />
-</LinearLayout>
+        <!-- Game Mode Cards -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_offline"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="12dp"
+                    app:tint="@color/secondary_color" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Offline Multiplayer"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Play with a friend on the same device"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:layout_gravity="center"
+                    android:textAlignment="center" />
+
+                <Button
+                    android:id="@+id/OfflineButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="Play"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/primary_color"
+                    android:layout_marginTop="16dp"
+                    style="@style/Widget.Material3.Button" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_solo"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="12dp"
+                    app:tint="@color/secondary_color" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Solo Challenge"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Test your skills against AI"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:layout_gravity="center"
+                    android:textAlignment="center" />
+
+                <Button
+                    android:id="@+id/SoloButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="Play"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/primary_color"
+                    android:layout_marginTop="16dp"
+                    style="@style/Widget.Material3.Button" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_online"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="12dp"
+                    app:tint="@color/secondary_color" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Online Multiplayer"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Play with friends online"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="14sp"
+                    android:layout_gravity="center"
+                    android:textAlignment="center" />
+
+                <Button
+                    android:id="@+id/OnlineButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="Play"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/primary_color"
+                    android:layout_marginTop="16dp"
+                    style="@style/Widget.Material3.Button" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Additional space at the bottom for better scrolling -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="40dp" />
+
+    </LinearLayout>
+</ScrollView>

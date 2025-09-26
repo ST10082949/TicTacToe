@@ -6,43 +6,60 @@ import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var gridLayout: GridLayout
     private lateinit var resetButton: Button
-    private var playerTurn = true // true for Player 1 (X), false for Player 2 (O)
-    private var gameState = Array(9) { "" } // "" means the cell/block on the grid is unoccupied
+    private lateinit var playerTurnText: TextView
+    private lateinit var gameModeText: TextView
+
+    private var playerTurn = true // true for Player 1 (X), false for Player 2/O
+    private var gameState = Array(9) { "" }
+    private var gameActive = true
+    private var gameMode = "OFFLINE_MULTI"
+    private var difficulty = "MEDIUM"
+    private var isPlayerTurn = true
+
+    companion object {
+        const val PLAYER_X = "X"
+        const val PLAYER_O = "O"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        gridLayout = findViewById(R.id.gridLayout)
-        resetButton= findViewById(R.id.resetButton)
 
-        //sets the board --method below
+        initializeViews()
+        setupGameMode()
         initializeBoard()
+        setupClickListeners()
+        updateUI()
+    }
 
-        //what happens when the reset button is clicked
-        resetButton.setOnClickListener {
-            //resets the board
-            initializeBoard()
-            //reset button disappears
-            resetButton.visibility = View.INVISIBLE
-            Toast.makeText(this, "Player 1's turn (X)",Toast.LENGTH_SHORT).show()
-            gameState.fill("")
-            playerTurn = true
+    private fun initializeViews() {
+        gridLayout = findViewById(R.id.gridLayout)
+        resetButton = findViewById(R.id.resetButton)
+        playerTurnText = findViewById(R.id.playerTurnText)
+        gameModeText = findViewById(R.id.gameModeText)
+    }
+
+    private fun setupGameMode() {
+        gameMode = intent.getStringExtra("GAME_MODE") ?: "OFFLINE_MULTI"
+        difficulty = intent.getStringExtra("DIFFICULTY") ?: "MEDIUM"
+
+        gameModeText.text = when (gameMode) {
+            "SOLO" -> "Solo Mode - $difficulty"
+            "OFFLINE_MULTI" -> "Two Player Mode"
+            else -> "Two Player Mode"
         }
     }
 
     private fun initializeBoard() {
         gridLayout.removeAllViews()
-        for (i in 0 until 9 ) {
+        for (i in 0 until 9) {
             val button = Button(this).apply {
                 layoutParams = GridLayout.LayoutParams().apply {
                     width = 0
@@ -50,58 +67,248 @@ class MainActivity : AppCompatActivity() {
                     rowSpec = GridLayout.spec(i / 3, 1f)
                     columnSpec = GridLayout.spec(i % 3, 1f)
                 }
+                textSize = 24f
                 text = ""
-                setOnClickListener { playGame(this, i) }
             }
             gridLayout.addView(button)
         }
+        resetGameState()
     }
 
-    private fun playGame(button: Button, cellIndex: Int) {
-        if (gameState[cellIndex].isNotEmpty()) {
+    private fun setupClickListeners() {
+        for (i in 0 until gridLayout.childCount) {
+            val button = gridLayout.getChildAt(i) as Button
+            button.setOnClickListener {
+                if (gameActive) {
+                    onCellClick(i, button)
+                }
+            }
+        }
+
+        resetButton.setOnClickListener {
+            resetGame()
+        }
+    }
+
+    private fun onCellClick(index: Int, button: Button) {
+        if (gameState[index].isNotEmpty()) {
             Toast.makeText(this, "Cell is already occupied", Toast.LENGTH_SHORT).show()
             return
         }
-        gameState[cellIndex] = if (playerTurn) "X" else "O"
-        button.text = gameState[cellIndex]
-        // Switch player turns
-        playerTurn = !playerTurn
-        checkForWin() // Check if the move leads to a win or a draw -- method below
-        if (playerTurn)
-        {
-            Toast.makeText(this, "Player 2's turn (X)",Toast.LENGTH_SHORT).show()
-        }
-        else
-        {
-            Toast.makeText(this, "Player 1's turn (O)",Toast.LENGTH_SHORT).show()
+
+        when (gameMode) {
+            "SOLO" -> handleSoloMove(index, button)
+            "OFFLINE_MULTI" -> handleMultiplayerMove(index, button)
         }
     }
 
-    private fun checkForWin() {
-        val winningPositions = arrayOf(
-            arrayOf(0, 1, 2), arrayOf(3, 4, 5), arrayOf(6, 7, 8), // Rows
-            arrayOf(0, 3, 6), arrayOf(1, 4, 7), arrayOf(2, 5, 8), // Columns
-            arrayOf(0, 4, 8), arrayOf(2, 4, 6)                    // Diagonals
-        )
-        winningPositions.forEach { pos ->
-            if (gameState[pos[0]] == gameState[pos[1]] &&
-                gameState[pos[1]] == gameState[pos[2]] &&
-                gameState[pos[0]] != "") {
-                // We have a winner
-                showToast("${gameState[pos[0]]} has won")
-                gridLayout.isEnabled = false // Disable moves
-                resetButton.visibility = View.VISIBLE //brings up the reset button
-                return
+    private fun handleSoloMove(index: Int, button: Button) {
+        if (!isPlayerTurn) return
+
+        // Player's move
+        makeMove(index, PLAYER_X, button)
+        if (checkGameStatus()) return
+
+        // AI's move
+        isPlayerTurn = false
+        updateUI()
+
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(500) // Add delay for better UX
+            makeAIMove()
+            isPlayerTurn = true
+            updateUI()
+        }
+    }
+
+    private fun handleMultiplayerMove(index: Int, button: Button) {
+        val currentPlayer = if (playerTurn) PLAYER_X else PLAYER_O
+        makeMove(index, currentPlayer, button)
+        playerTurn = !playerTurn
+        updateUI()
+        checkGameStatus()
+    }
+
+    private fun makeMove(index: Int, player: String, button: Button) {
+        gameState[index] = player
+        button.text = player
+        button.isEnabled = false
+    }
+
+    private fun makeAIMove() {
+        if (!gameActive) return
+
+        val move = when (difficulty) {
+            "EASY" -> getRandomMove()
+            "MEDIUM" -> getMediumAIMove()
+            "HARD" -> getHardAIMove()
+            else -> getMediumAIMove()
+        }
+
+        move?.let { index ->
+            val button = gridLayout.getChildAt(index) as Button
+            makeMove(index, PLAYER_O, button)
+            checkGameStatus()
+        }
+    }
+
+    private fun getRandomMove(): Int? {
+        val emptyCells = mutableListOf<Int>()
+        for (i in gameState.indices) {
+            if (gameState[i].isEmpty()) {
+                emptyCells.add(i)
             }
         }
-        // Check for a draw (no empty cells left)
-        if (gameState.none { it.isEmpty() }) {
-            showToast("It's a draw")
-            gridLayout.isEnabled = false // Disable further moves
+        return emptyCells.randomOrNull()
+    }
+
+    private fun getMediumAIMove(): Int? {
+        // Try to win
+        for (i in gameState.indices) {
+            if (gameState[i].isEmpty()) {
+                gameState[i] = PLAYER_O
+                if (checkWinner() == PLAYER_O) {
+                    gameState[i] = ""
+                    return i
+                }
+                gameState[i] = ""
+            }
         }
+
+        // Block player
+        for (i in gameState.indices) {
+            if (gameState[i].isEmpty()) {
+                gameState[i] = PLAYER_X
+                if (checkWinner() == PLAYER_X) {
+                    gameState[i] = ""
+                    return i
+                }
+                gameState[i] = ""
+            }
+        }
+
+        return getRandomMove()
+    }
+
+    private fun getHardAIMove(): Int? {
+        var bestScore = Int.MIN_VALUE
+        var bestMove: Int? = null
+
+        for (i in gameState.indices) {
+            if (gameState[i].isEmpty()) {
+                gameState[i] = PLAYER_O
+                val score = minimax(0, false)
+                gameState[i] = ""
+
+                if (score > bestScore) {
+                    bestScore = score
+                    bestMove = i
+                }
+            }
+        }
+
+        return bestMove ?: getRandomMove()
+    }
+
+    private fun minimax(depth: Int, isMaximizing: Boolean): Int {
+        val winner = checkWinner()
+
+        if (winner == PLAYER_O) return 10 - depth
+        if (winner == PLAYER_X) return depth - 10
+        if (gameState.none { it.isEmpty() }) return 0
+
+        return if (isMaximizing) {
+            var bestScore = Int.MIN_VALUE
+            for (i in gameState.indices) {
+                if (gameState[i].isEmpty()) {
+                    gameState[i] = PLAYER_O
+                    val score = minimax(depth + 1, false)
+                    gameState[i] = ""
+                    bestScore = maxOf(bestScore, score)
+                }
+            }
+            bestScore
+        } else {
+            var bestScore = Int.MAX_VALUE
+            for (i in gameState.indices) {
+                if (gameState[i].isEmpty()) {
+                    gameState[i] = PLAYER_X
+                    val score = minimax(depth + 1, true)
+                    gameState[i] = ""
+                    bestScore = minOf(bestScore, score)
+                }
+            }
+            bestScore
+        }
+    }
+
+    private fun checkGameStatus(): Boolean {
+        val winner = checkWinner()
+
+        if (winner != null) {
+            gameActive = false
+            showToast("Player $winner wins!")
+            resetButton.visibility = View.VISIBLE
+            return true
+        } else if (gameState.none { it.isEmpty() }) {
+            gameActive = false
+            showToast("It's a draw!")
+            resetButton.visibility = View.VISIBLE
+            return true
+        }
+        return false
+    }
+
+    private fun checkWinner(): String? {
+        val winningPositions = arrayOf(
+            intArrayOf(0, 1, 2), intArrayOf(3, 4, 5), intArrayOf(6, 7, 8),
+            intArrayOf(0, 3, 6), intArrayOf(1, 4, 7), intArrayOf(2, 5, 8),
+            intArrayOf(0, 4, 8), intArrayOf(2, 4, 6)
+        )
+
+        for (positions in winningPositions) {
+            if (gameState[positions[0]].isNotEmpty() &&
+                gameState[positions[0]] == gameState[positions[1]] &&
+                gameState[positions[0]] == gameState[positions[2]]) {
+                return gameState[positions[0]]
+            }
+        }
+        return null
+    }
+
+    private fun updateUI() {
+        when (gameMode) {
+            "SOLO" -> {
+                playerTurnText.text = if (isPlayerTurn) "Your turn (X)" else "AI thinking..."
+            }
+            "OFFLINE_MULTI" -> {
+                val currentPlayer = if (playerTurn) "X" else "O"
+                playerTurnText.text = "Player $currentPlayer's turn"
+            }
+        }
+    }
+
+    private fun resetGameState() {
+        gameState.fill("")
+        gameActive = true
+        playerTurn = true
+        isPlayerTurn = true
+        resetButton.visibility = View.INVISIBLE
+
+        for (i in 0 until gridLayout.childCount) {
+            val button = gridLayout.getChildAt(i) as Button
+            button.text = ""
+            button.isEnabled = true
+        }
+    }
+
+    private fun resetGame() {
+        resetGameState()
+        updateUI()
+        showToast("Game reset!")
     }
 
     private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }
